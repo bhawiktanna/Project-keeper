@@ -1,0 +1,237 @@
+#include<iostream>
+#include<fstream>
+#include<cstdlib>
+#include<vector>
+#include<map>
+#include<cstring>
+using namespace std;
+
+class Student
+{
+private:
+long rollNo;
+string firstName;
+string lastName;
+//string ProjName;
+
+
+public:
+	char str[100];
+Student(){}
+Student(long,string ,string ,char*);
+long getRollNo(){return rollNo;}
+string getFirstName(){return firstName;}
+string getLastName(){return lastName;}
+//string getProjName(){return ProjName;}
+
+friend ofstream & operator<<(ofstream &ofs,Student &s);
+friend ifstream & operator>>(ifstream &ifs,Student &s);
+friend ostream & operator<<(ostream &os,Student &s);
+};
+
+class Project
+{
+private:
+map<long,Student> students;
+public:
+Project();
+Student Registration(long rollNo,string fname,string lname,char str[100]);
+Student GetStudentInfo(long rollNo);
+
+
+void DelStudentInfo(long rollNo);
+void ShowAllProjects();
+~Project();
+};
+int main()
+{
+char c=' ',str[100];
+Project p;
+Student s;
+int choice;
+string fname,lname,p2=" ",p1;
+long rollNo;
+string ProjName;
+
+cout<<"***Project Keeper***"<<endl;
+do
+{
+cout<<"\n\tSelect one option below ";
+cout<<"\n\t1 Register a Student";
+cout<<"\n\t2 Get Student Info";
+//cout<<"\n\t3 Add Project";
+
+cout<<"\n\t3 Delele Student Info";
+cout<<"\n\t4 Show All Students";
+cout<<"\n\t5 Quit";
+cout<<"\nEnter your choice: ";
+cin>>choice;
+switch(choice)
+{
+case 1:
+cout<<"Enter Roll Number:";
+
+cin>>rollNo;
+
+cout<<"Enter First Name: ";
+
+cin>>fname;
+
+cout<<"Enter Last Name: ";
+
+
+cin>>lname;
+cout<<"Enter Project Name:";
+c=getchar();
+fgets(str,100,stdin);
+//ProjName=str;
+c=getchar();
+/*cin>>ProjName;
+
+while(1)
+{
+	cin>>c;
+		if(c>='A'&&c<='Z')
+		ProjName+=' ';
+		if(c=='.')
+		{
+			//cin>>c;
+		//	if(c=='\n')
+			break;
+		}
+       
+	ProjName+=c;
+
+}*/
+
+
+
+s=p.Registration(rollNo,fname,lname,str);
+cout<<endl<<"Student successfully registered"<<endl;
+cout<<s;
+break;
+case 2:
+cout<<"Enter Roll Number:";
+cin>>rollNo;
+s=p.GetStudentInfo(rollNo);
+cout<<endl<<"Student Details"<<endl;
+cout<<s;
+break;
+
+
+case 3:
+cout<<"Enter Roll Number:";
+cin>>rollNo;
+p.DelStudentInfo(rollNo);
+
+case 4:
+p.ShowAllProjects();
+break;
+case 5: break;
+default:
+cout<<"\nEnter corret choice";
+exit(0);
+}
+}while(choice!=5);
+return 0;
+}
+Student::Student(long rollNo,string firstName,string lastName,char str[100])
+{
+
+this->rollNo=rollNo;
+this->firstName=firstName;
+this->lastName=lastName;
+//this->ProjName=ProjName;
+strcpy(this->str,str);
+}
+char c;
+
+ofstream & operator<<(ofstream &ofs,Student &s)
+{
+ofs<<s.rollNo<<endl;
+ofs<<s.firstName<<endl;
+ofs<<s.lastName<<endl;
+ofs<<s.str<<endl;
+return ofs;
+}
+ifstream & operator>>(ifstream &ifs,Student &s)
+{
+ifs>>s.rollNo;
+ifs>>s.firstName;
+ifs>>s.lastName;
+//c=getchar();
+//fgets(s.str,100,stdin);
+return ifs;
+}
+ostream & operator<<(ostream &os,Student &s)
+{
+os<<"Roll Number:"<<s.getRollNo()<<endl;
+os<<"First Name:"<<s.getFirstName()<<endl;
+os<<"Last Name:"<<s.getLastName()<<endl;
+os<<"Project Name:"<<s.str<<endl;
+return os;
+}
+Project::Project()
+{
+Student student;
+ifstream infile;
+infile.open("PK.data");
+if(!infile)
+{
+//cout<<"Error in Opening! File Not Found!!"<<endl;
+return;
+}
+while(!infile.eof())
+{
+infile>>student;
+students.insert(pair<long,Student>(student.getRollNo(),student));
+}
+
+infile.close();
+}
+Student Project::Registration(long rollNo,string fname,string lname,char str[100])
+{
+ofstream outfile;
+Student student(rollNo,fname,lname,str);
+//outfile.write((char *)str,sizeof(str));
+students.insert(pair<long,Student>(student.getRollNo(),student));
+outfile.open("PK.data", ios::trunc);
+map<long,Student>::iterator itr;
+for(itr=students.begin();itr!=students.end();itr++)
+{
+outfile<<itr->second;
+}
+outfile.close();
+return student;
+}
+Student Project::GetStudentInfo(long RollNumber)
+{
+map<long,Student>::iterator itr=students.find(RollNumber);
+return itr->second;
+}
+
+void Project::DelStudentInfo(long RollNumber)
+{
+map<long,Student>::iterator itr=students.find(RollNumber);
+cout<<"\n\nStudent Deleted\nRemaining Students are\n\n";
+students.erase(RollNumber);
+}
+void Project::ShowAllProjects()
+{
+map<long,Student>::iterator itr;
+for(itr=students.begin();itr!=students.end();itr++)
+{
+cout<<"Student "<<itr->first<<endl<<itr->second<<endl;
+}
+}
+Project::~Project()
+{
+ofstream outfile;
+outfile.open("PK.data", ios::trunc);
+map<long,Student>::iterator itr;
+for(itr=students.begin();itr!=students.end();itr++)
+{
+outfile<<itr->second;
+}
+outfile.close();
+}
